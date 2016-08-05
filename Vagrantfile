@@ -10,10 +10,18 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision "shell", inline: <<-SHELL
-    sudo apt-get update && sudo apt-get upgrade -y
+    # Install docker
     sudo apt-get install -y curl wget git vim
     curl -fsSL https://get.docker.com/ | sh
     sudo usermod -aG docker vagrant
+
+    # Enable docker remote api
+    sudo cp /vagrant/systemd/docker-tcp.socket /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable docker-tcp.socket
+    sudo systemctl stop docker
+    sudo systemctl start docker-tcp.socket
+    sudo systemctl start docker
   SHELL
 
   config.vm.define "swarm-manager1" do |c|
